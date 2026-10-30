@@ -1,3 +1,4 @@
+// thanks to https://gist.github.com/stavrossk/5004111 for helping in drawing texts but GPT-Luna 6 improve it
 /**************************
  * Includes
  *
@@ -5,6 +6,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <math.h>
 #include <cstdlib>
 
@@ -71,6 +73,63 @@ void restart()
 	statics::gameoverProg = 0;
 	statics::pipeDir = false;
 }
+void drawText(const char* text, int size, float x, float y)
+{
+    TTF_Font* font = TTF_OpenFont("ARIAL.TTF", size);
+    if (!font) {
+        SDL_Log("TTF_OpenFont failed: %s", SDL_GetError());
+        return;
+    }
+
+    SDL_Color white = {255, 255, 255, 255};
+    SDL_Surface* surface = TTF_RenderText_Blended(font, text, 0, white);
+    TTF_CloseFont(font);
+
+if (!surface) {
+    SDL_Log("Text render failed: %s", SDL_GetError());
+    TTF_CloseFont(font);
+    return;
+}
+SDL_Log("Text surface: %d x %d", surface->w, surface->h);
+
+    SDL_Surface* rgba = SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA32);
+    SDL_DestroySurface(surface);
+
+    if (!rgba) {
+        SDL_Log("SDL_ConvertSurface failed: %s", SDL_GetError());
+        return;
+    }
+
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rgba->w, rgba->h, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, rgba->pixels);
+
+    float w = 2.0f * rgba->w / 512.0f;
+    float h = 2.0f * rgba->h / 512.0f;
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(1, 1, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex2f(x,     y);
+        glTexCoord2f(1, 0); glVertex2f(x + w, y);
+        glTexCoord2f(1, 1); glVertex2f(x + w, y - h);
+        glTexCoord2f(0, 1); glVertex2f(x,     y - h);
+    glEnd();
+
+    glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
+
+    glDeleteTextures(1, &texture);
+    SDL_DestroySurface(rgba);
+}
 int main()
 {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -105,7 +164,10 @@ int main()
     bool running = true;
     SDL_Event event;
     float theta = 0.0f;
+    TTF_Init();
 
+	// Pass zero for width and height to draw the whole surface
+	SDL_Rect textLocation = { 100, 100, 0, 0 };
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT) {
@@ -132,7 +194,6 @@ int main()
 
             glClearColor (0.0f, 0.1f, 0.8f, 0.0f);
             glClear (GL_COLOR_BUFFER_BIT);
-
             glPushMatrix ();
             // glRotatef (statics::jumpProg * 20, 0.0f, 0.0f, 1.0f);
             glBegin (GL_TRIANGLES); // player bird body rendering start
@@ -247,6 +308,11 @@ int main()
 				}
 			}
 		}
+		else
+		{
+			drawText("Flappy Triangle Bird Game", 24, -0.9f, 0.9f);
+			drawText("PRESS UP TO START", 24, -0.9f, 0.7f);
+		}
 
         SDL_GL_SwapWindow(window);
         SDL_Delay(1);
@@ -254,6 +320,7 @@ int main()
 
     SDL_GL_DestroyContext(context);
     SDL_DestroyWindow(window);
+	TTF_Quit();
     SDL_Quit();
     return 0;
 }
