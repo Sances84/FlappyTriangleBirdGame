@@ -3,8 +3,8 @@
  *
  **************************/
 
-#include <gl/gl.h>
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_opengl.h>
 #include <math.h>
 #include <cstdlib>
 
@@ -14,10 +14,7 @@
  *
  **************************/
 
-LRESULT CALLBACK WndProc (HWND hWnd, UINT message,
-WPARAM wParam, LPARAM lParam);
-void EnableOpenGL (HWND hWnd, HDC *hDC, HGLRC *hRC);
-void DisableOpenGL (HWND hWnd, HDC hDC, HGLRC hRC);
+// destructued due to migration to SDL to make it cross platform :x
 
 /**************************
  * WinMain
@@ -74,60 +71,59 @@ void restart()
 	statics::gameoverProg = 0;
 	statics::pipeDir = false;
 }
-int WINAPI WinMain (HINSTANCE hInstance,
-                    HINSTANCE hPrevInstance,
-                    LPSTR lpCmdLine,
-                    int iCmdShow)
+int main()
 {
-    WNDCLASS wc;
-    HWND hWnd;
-    HDC hDC;
-    HGLRC hRC;        
-    MSG msg;
-    BOOL bQuit = FALSE;
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        SDL_Log("SDL_Init failed: %s", SDL_GetError());
+        return 1;
+    }
+
+    // Your existing glBegin/glEnd drawing uses older OpenGL features.
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
+    SDL_Window* window = SDL_CreateWindow(
+        "Flappy Triangle Bird Game",
+        512, 512,
+        SDL_WINDOW_OPENGL
+    );
+
+    if (!window) {
+        SDL_Log("Window creation failed: %s", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+
+    SDL_GLContext context = SDL_GL_CreateContext(window);
+    if (!context) {
+        SDL_Log("OpenGL context creation failed: %s", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
+    bool running = true;
+    SDL_Event event;
     float theta = 0.0f;
 
-    /* register window class */
-    wc.style = CS_OWNDC;
-    wc.lpfnWndProc = WndProc;
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = 0;
-    wc.hInstance = hInstance;
-    wc.hIcon = LoadIcon (NULL, IDI_APPLICATION);
-    wc.hCursor = LoadCursor (NULL, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
-    wc.lpszMenuName = NULL;
-    wc.lpszClassName = "FlappyTriangle";
-    RegisterClass (&wc);
-
-    /* create main window */
-    hWnd = CreateWindow (
-      "FlappyTriangle", "Flappy Triangle Bird Game", 
-      WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE,
-      0, 0, 512, 512,
-      NULL, NULL, hInstance, NULL);
-
-    /* enable OpenGL for the window */
-    EnableOpenGL (hWnd, &hDC, &hRC);
-    /* program main loop */
-    while (!bQuit)
-    {
-        /* check for messages */
-        if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
-        {
-            /* handle or dispatch messages */
-            if (msg.message == WM_QUIT)
-            {
-                bQuit = TRUE;
+    while (running) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_EVENT_QUIT) {
+                running = false;
             }
-            else
-            {
-                TranslateMessage (&msg);
-                DispatchMessage (&msg);
+
+            if (event.type == SDL_EVENT_KEY_DOWN) {
+                if (event.key.key == SDLK_ESCAPE) {
+                    running = false;
+                } else if (event.key.key == SDLK_UP) {
+                    statics::mainmenu = false;
+                    if (statics::jumpProg < 0.01f && !statics::gameover) {
+                        statics::jumpProg = 1;
+                    }
+                }
             }
         }
-        else
-        {
+
    	     	float pipeLeft   = statics::pipe_pos_x + 0.25f;
     		float pipeRight  = pipeLeft + 0.125f;
     		float pipeTop    = statics::pipeDir ? -statics::pipe_pos_y / 4.0f : statics::pipe_pos_y / 4.0f;
@@ -182,8 +178,6 @@ int WINAPI WinMain (HINSTANCE hInstance,
 			glEnd (); // pipe cap rendering end
             
             glPopMatrix ();
-
-            SwapBuffers (hDC);
 
             theta += 1.0f;
         if (!statics::mainmenu)
@@ -253,100 +247,13 @@ int WINAPI WinMain (HINSTANCE hInstance,
 				}
 			}
 		}
-            Sleep (1);
-        }
+
+        SDL_GL_SwapWindow(window);
+        SDL_Delay(1);
     }
 
-    /* shutdown OpenGL */
-    DisableOpenGL (hWnd, hDC, hRC);
-
-    /* destroy the window explicitly */
-    DestroyWindow (hWnd);
-
-    return msg.wParam;
-}
-/********************
- * Window Procedure
- *
- ********************/
-
-LRESULT CALLBACK WndProc (HWND hWnd, UINT message,
-                          WPARAM wParam, LPARAM lParam)
-{
-
-    switch (message)
-    {
-    case WM_CREATE:
-        return 0;
-    
-    case WM_CLOSE:
-        PostQuitMessage (0);
-        return 0;
-
-    case WM_DESTROY:
-        return 0;
-
-    case WM_KEYDOWN:
-        switch (wParam)
-        {
-        case VK_ESCAPE:
-            PostQuitMessage(0);
-            return 0;
-        case VK_UP:
-        	statics::mainmenu = false;
-        	if (statics::jumpProg < 0.01f && !statics::gameover)
-        	{
-			 	statics::jumpProg = 1;
-			}
-        }
-        return 0;
-
-    default:
-        return DefWindowProc (hWnd, message, wParam, lParam);
-    }
-}
-
-/*******************
- * Enable OpenGL
- *
- *******************/
-
-void EnableOpenGL (HWND hWnd, HDC *hDC, HGLRC *hRC)
-{
-    PIXELFORMATDESCRIPTOR pfd;
-    int iFormat;
-
-    /* get the device context (DC) */
-    *hDC = GetDC (hWnd);
-
-    /* set the pixel format for the DC */
-    ZeroMemory (&pfd, sizeof (pfd));
-    pfd.nSize = sizeof (pfd);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | 
-      PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 24;
-    pfd.cDepthBits = 16;
-    pfd.iLayerType = PFD_MAIN_PLANE;
-    iFormat = ChoosePixelFormat (*hDC, &pfd);
-    SetPixelFormat (*hDC, iFormat, &pfd);
-
-    /* create and enable the render context (RC) */
-    *hRC = wglCreateContext( *hDC );
-    wglMakeCurrent( *hDC, *hRC );
-
-}
-
-
-/******************
- * Disable OpenGL
- *
- ******************/
-
-void DisableOpenGL (HWND hWnd, HDC hDC, HGLRC hRC)
-{
-    wglMakeCurrent (NULL, NULL);
-    wglDeleteContext (hRC);
-    ReleaseDC (hWnd, hDC);
+    SDL_GL_DestroyContext(context);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    return 0;
 }
