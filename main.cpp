@@ -3,8 +3,8 @@
  *
  **************************/
 
-#include <windows.h>
 #include <gl/gl.h>
+#include <SDL3/SDL.h>
 #include <math.h>
 #include <cstdlib>
 
