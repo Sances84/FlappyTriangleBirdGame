@@ -190,6 +190,8 @@ int main()
     		float pipeRight  = pipeLeft + 0.125f;
     		float pipeTop    = statics::pipeDir ? -statics::pipe_pos_y / 4.0f : statics::pipe_pos_y / 4.0f;
     		float pipeBottom = statics::pipeDir ? pipeTop + 10.0f / 4.0f : pipeTop - 10.0f / 4.0f;
+    		float pipeTopCol    = statics::pipeDir ? pipeTop + 10.0f / 4.0f : statics::pipe_pos_y / 4.0f;
+    		float pipeBottomCol = statics::pipeDir ? -statics::pipe_pos_y / 4.0f : pipeTop - 10.0f / 4.0f;
             /* OpenGL animation code goes here */
 
             glClearColor (0.0f, 0.1f, 0.8f, 0.0f);
@@ -291,11 +293,10 @@ int main()
 			    float birdRight  = statics::pos_x + (0.2175f / 1.4f);
 	            float birdBottom = statics::pos_y - (0.125f / 1.3f);
 			    float birdTop    = statics::pos_y + (0.25f / 1.3f);
-
-			    if (birdRight > pipeLeft &&
+    			if (birdRight > pipeLeft &&
        		        birdLeft < pipeRight &&
-   			        birdTop > pipeBottom &&
-   			        birdBottom < pipeTop)
+   			 		birdTop > pipeBottomCol &&
+   			        birdBottom < pipeTopCol)
                 {
   		  		    statics::gameover = true;
 				}
