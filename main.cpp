@@ -1,4 +1,6 @@
+// Some of comments that are with slash and lot of stars are from an template of Dev C++, however the commentary is mine -main developer of game
 // thanks to https://gist.github.com/stavrossk/5004111 for helping in drawing texts but GPT-Luna 6 improve it
+// +Uses modern SDL3 without old SDL2 from SDL3-devel-3.4.18-mingw.zip and SDL3_ttf-devel-3.2.2-mingw.zip files
 /**************************
  * Includes
  *
@@ -22,7 +24,7 @@
  * WinMain
  *
  **************************/
-class statics {
+class statics { // Thanks to the GeeksForGeeks to learned to make static variables infrastructure
 public:
     static int score;
     static float pos_x;
@@ -288,7 +290,7 @@ int main()
             	statics::gameoverProg = 0.9f;
             }
             if (!statics::gameover)
-            {
+            { // colliders system implemented by GPT-6 Luna so i wanna to do own collision functions but isn't work for me
                 float birdLeft   = statics::pos_x - (0.2175f / 1.4f);
 			    float birdRight  = statics::pos_x + (0.2175f / 1.4f);
 	            float birdBottom = statics::pos_y - (0.125f / 1.3f);
