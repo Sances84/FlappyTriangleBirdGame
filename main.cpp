@@ -8,9 +8,11 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
+#include <SDL3/SDL_stdinc.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <math.h>
 #include <cstdlib>
+#include <stdio.h>
 
 
 /**************************
@@ -247,7 +249,9 @@ int main()
             theta += 1.0f;
         if (!statics::mainmenu)
 		{
-			drawText("Score: " + statics::score, 24, -0.9f, 0.9f);
+			char text[32];
+			snprintf(text, sizeof text, "Score: %d", statics::score);
+			drawText(text, 24, -0.9f, 0.9f);
             if (!statics::gameover)
             {
             	statics::pos_y -= 0.01f;
