@@ -323,7 +323,7 @@ int main()
 		}
 
         SDL_GL_SwapWindow(window);
-        SDL_Delay(1);
+        SDL_DelayPrecise(1000000);
     }
 
     SDL_GL_DestroyContext(context);
