@@ -39,6 +39,10 @@ public:
     static bool gameover;
     static float gameoverProg;
     static bool mainmenu;
+    static float resW;
+    static float resH;
+    static float resTextW;
+    static float resTextH;
     statics(){
         // Do nothing
     };
@@ -54,6 +58,10 @@ bool statics::gameover = false;
 float statics::gameoverProg = 0;
 bool statics::mainmenu = true;
 bool statics::pipeDir = false;
+float statics::resW = 812;
+float statics::resH = 812;
+float statics::resTextW = statics::resW / 2.0f;
+float statics::resTextH = statics::resH / 2.0f;
 bool collision(float dotX,float dotY, float zoneX1, float zoneX2, float zoneY1, float zoneY2)
 {
 	return dotX > zoneX1 && dotX < zoneX2 && dotY > zoneY1 && dotY < zoneY2;
@@ -112,8 +120,8 @@ SDL_Log("Text surface: %d x %d", surface->w, surface->h);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rgba->w, rgba->h, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, rgba->pixels);
 
-    float w = 2.0f * rgba->w / 512.0f;
-    float h = 2.0f * rgba->h / 512.0f;
+    float w = 2.0f * rgba->w / statics::resTextW;
+    float h = 2.0f * rgba->h / statics::resTextH;
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
@@ -134,6 +142,31 @@ SDL_Log("Text surface: %d x %d", surface->w, surface->h);
     glDeleteTextures(1, &texture);
     SDL_DestroySurface(rgba);
 }
+void setViewport(int windowW, int windowH) { // Provided by GPT-6 Luna
+    if (windowW <= 0 || windowH <= 0) return;
+
+    float gameAspect = 1.0f; // 512 x 512
+    float windowAspect = static_cast<float>(windowW) / windowH;
+
+    int viewportW, viewportH;
+    if (windowAspect > gameAspect) {
+        viewportH = windowH;
+        viewportW = static_cast<int>(windowH * gameAspect);
+    } else {
+        viewportW = windowW;
+        viewportH = static_cast<int>(windowW / gameAspect);
+    }
+
+    int x = (windowW - viewportW) / 2;
+    int y = (windowH - viewportH) / 2;
+
+    statics::resW = static_cast<float>(viewportW);
+    statics::resH = static_cast<float>(viewportH);
+    statics::resTextW = statics::resW; // half-width in pixels for your text formula
+    statics::resTextH = statics::resH;
+
+    glViewport(x, y, viewportW, viewportH);
+}
 int main()
 {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -147,8 +180,8 @@ int main()
 
     SDL_Window* window = SDL_CreateWindow(
         "Flappy Triangle Bird Game",
-        512, 512,
-        SDL_WINDOW_OPENGL
+        statics::resW, statics::resH,
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL
     );
 
     if (!window) {
@@ -176,6 +209,10 @@ int main()
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT) {
                 running = false;
+            }
+            
+			if (event.type == SDL_EVENT_WINDOW_RESIZED) {
+         	   setViewport(event.window.data1, event.window.data2);
             }
 
             if (event.type == SDL_EVENT_KEY_DOWN) {
