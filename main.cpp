@@ -1,3 +1,20 @@
+/*
+    Flappy Triangle Bird Game
+    Copyright (C) 2026 Sances84
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 // Some of comments that are with slash and lot of stars are from an template of Dev C++, however the commentary is mine -main developer of game
 // thanks to https://gist.github.com/stavrossk/5004111 for helping in drawing texts but GPT-Luna 6 improve it
 // +Uses modern SDL3 without old SDL2 from SDL3-devel-3.4.18-mingw.zip and SDL3_ttf-devel-3.2.2-mingw.zip files
@@ -14,18 +31,6 @@
 #include <cstdlib>
 #include <stdio.h>
 
-
-/**************************
- * Function Declarations
- *
- **************************/
-
-// destructued due to migration to SDL to make it cross platform :x
-
-/**************************
- * WinMain
- *
- **************************/
 class statics { // Thanks to the GeeksForGeeks to learned to make static variables infrastructure
 public:
     static int score;
