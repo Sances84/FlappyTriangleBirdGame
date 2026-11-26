@@ -5,6 +5,7 @@ It is a clone to the famous Flappy Bird game from 2014 year.<br>
 Also, it is GPL3 licensed so as of upload. Free to use under some conditions written in this license.<br>
 Pull requests and issues are welcome in to contribute to the game.<br>
 The game is possible to port into other OS using own makefile into it.<br>
+Please do pull requests if you want to give the repository have some ports of game into other devices.<br>
 
 # History of development of game
 October 27, 2026 - start of development, planning to make a platformer genre videogame, but i decided workaround to just make flappy bird game clone easier than the platformer.<br>
