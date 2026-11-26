@@ -29,6 +29,8 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <math.h>
 #include <cstdlib>
+#include <cstring>
+#include <string>
 #include <stdio.h>
 
 class statics { // Thanks to the GeeksForGeeks to learned to make static variables infrastructure
@@ -49,6 +51,7 @@ public:
     static float resH;
     static float resTextW;
     static float resTextH;
+    static char* versionMetadata;
     statics(){
         // Do nothing
     };
@@ -69,6 +72,7 @@ float statics::resW = 812;
 float statics::resH = 812;
 float statics::resTextW = statics::resW / 2.0f;
 float statics::resTextH = statics::resH / 2.0f;
+char* statics::versionMetadata = "1.0.1"; // Change this line with version counter forward to make a new version in contribution
 bool collision(float dotX,float dotY, float zoneX1, float zoneX2, float zoneY1, float zoneY2)
 {
 	return dotX > zoneX1 && dotX < zoneX2 && dotY > zoneY1 && dotY < zoneY2;
@@ -174,8 +178,39 @@ void setViewport(int windowW, int windowH) { // Provided by GPT-6 Luna
 
     glViewport(x, y, viewportW, viewportH);
 }
-int main()
+int main(int argc, char *argv[])
 {
+ 	if (argc > 1) // this full piece of code called argc > 1 is provided by GPT-Luna 6
+  	{
+       const std::string arg = argv[1];
+
+       if (arg == "-debug")
+       {
+          statics::debug = true;
+       }
+       else if (arg == "-v")
+       {
+        	const int sdlVersion = SDL_GetVersion();
+
+        	SDL_Log("Flappy Triangle Bird Game");
+        	SDL_Log("Version %s", statics::versionMetadata);
+        	SDL_Log("SDL Version: %d.%d.%d",
+                	SDL_VERSIONNUM_MAJOR(sdlVersion),
+                	SDL_VERSIONNUM_MINOR(sdlVersion),
+                	SDL_VERSIONNUM_MICRO(sdlVersion));
+        	return 0;
+    	}
+    	else if (arg == "-help")
+    	{
+   	 	 	SDL_Log("Flappy Triangle Bird Game");
+        	SDL_Log("Version %s", statics::versionMetadata);
+        	SDL_Log("Every argument of this executable includes:");
+        	SDL_Log(" -debug: Run a game with debug");
+        	SDL_Log(" -v: read a version of game");
+        	SDL_Log(" -help: Show this help");
+        	return 0;
+   		}
+	}
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("SDL_Init failed: %s", SDL_GetError());
         return 1;
