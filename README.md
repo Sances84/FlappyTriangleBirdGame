@@ -12,4 +12,8 @@ October 27, 2026 - start of development, planning to make a platformer genre vid
 This is how in commit history was written "Platformer" name of project.<br>
 I used Viktor Shitov's russian book called "C++ for beginners" to develop it, so this is why IDE software that i use is Dev C++ following by this book.<br>
 AI GPT-Luna series helped to migrate it in SDL, forced after at October 30, 2026 when i initialized repository of the game then to record history in.<br>
-As of 26 October, 2026, i decided to give access to reuse it under credit, play, or modify source code of this game as FOSS into platform called Github.
+As of 26 October, 2026, i decided to give access to reuse it under credit, play, or modify source code of this game as FOSS into platform called Github.<br>
+
+# Credits to FOSS software used in this game
+* SDL 3.4.18.0
+* SDL_ttf
