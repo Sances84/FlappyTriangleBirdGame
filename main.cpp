@@ -44,6 +44,7 @@ public:
     static bool gameover;
     static float gameoverProg;
     static bool mainmenu;
+    static bool debug;
     static float resW;
     static float resH;
     static float resTextW;
@@ -62,6 +63,7 @@ float statics::jumpProg = 0;
 bool statics::gameover = false;
 float statics::gameoverProg = 0;
 bool statics::mainmenu = true;
+bool statics::debug = false;
 bool statics::pipeDir = false;
 float statics::resW = 812;
 float statics::resH = 812;
@@ -231,7 +233,10 @@ int main()
                 }
             }
         }
-
+         	float birdLeft   = statics::pos_x - (0.2175f / 1.4f);
+			float birdRight  = statics::pos_x + (0.2175f / 1.4f);
+   			float birdBottom = statics::pos_y - (0.125f / 1.3f);
+			float birdTop    = statics::pos_y + (0.25f / 1.3f);
    	     	float pipeLeft   = statics::pipe_pos_x + 0.25f;
     		float pipeRight  = pipeLeft + 0.125f;
     		float pipeTop    = statics::pipeDir ? -statics::pipe_pos_y / 4.0f : statics::pipe_pos_y / 4.0f;
@@ -242,6 +247,11 @@ int main()
 
             glClearColor (0.0f, 0.1f, 0.8f, 0.0f);
             glClear (GL_COLOR_BUFFER_BIT);
+			/*
+			   to make debug player collision hitbox visual fixed and patched, i did use this glEnable(GL_BLEND); code.
+               source of this one-liner snippet was came from https://www.opengl.org/archives/resources/code/samples/advanced/advanced98/notes/node146.html
+            */
+            glEnable(GL_BLEND);
             glPushMatrix ();
             // glRotatef (statics::jumpProg * 20, 0.0f, 0.0f, 1.0f);
             glBegin (GL_TRIANGLES); // player bird body rendering start
@@ -285,7 +295,15 @@ int main()
             glColor3f  (0.0f,0.6f,0.0f); glVertex2f (pipeRight2,pipeBottom2);
             glColor3f  (0.0f,0.6f,0.0f); glVertex2f (pipeLeft2,pipeBottom2);
 			glEnd (); // pipe cap rendering end
-            
+			if (statics::debug)
+			{
+			   glBegin (GL_POLYGON); // player hitbox debug rendering start
+               glColor4f  (1.0f,0.0f,0.0f,0.5f); glVertex2f (birdLeft,birdTop);
+               glColor4f  (1.0f,0.0f,0.0f,0.5f); glVertex2f (birdRight,birdTop);
+               glColor4f  (1.0f,0.0f,0.0f,0.5f); glVertex2f (birdRight,birdBottom);
+               glColor4f  (1.0f,0.0f,0.0f,0.5f); glVertex2f (birdLeft,birdBottom);
+			   glEnd (); // player hitbox debug rendering end
+        	}
             glPopMatrix ();
 
             theta += 1.0f;
@@ -294,6 +312,12 @@ int main()
 			char text[32];
 			snprintf(text, sizeof text, "Score: %d", statics::score);
 			drawText(text, 24, -0.9f, 0.9f);
+			if (statics::debug)
+			{
+			   char text[48];
+			   snprintf(text, sizeof text, "pos_y: %f", static_cast<double>(statics::pos_y));
+			   drawText(text, 24, -0.9f, 0.8f);
+			}
             if (!statics::gameover)
             {
             	statics::pos_y -= 0.01f;
@@ -338,10 +362,6 @@ int main()
             }
             if (!statics::gameover)
             { // colliders system implemented by GPT-6 Luna so i wanna to do own collision functions but isn't work for me
-                float birdLeft   = statics::pos_x - (0.2175f / 1.4f);
-			    float birdRight  = statics::pos_x + (0.2175f / 1.4f);
-	            float birdBottom = statics::pos_y - (0.125f / 1.3f);
-			    float birdTop    = statics::pos_y + (0.25f / 1.3f);
     			if (birdRight > pipeLeft &&
        		        birdLeft < pipeRight &&
    			 		birdTop > pipeBottomCol &&
