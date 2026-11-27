@@ -28,8 +28,6 @@
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <math.h>
-#include <cstdlib>
-#include <cstring>
 #include <string>
 #include <stdio.h>
 
@@ -47,6 +45,7 @@ public:
     static float gameoverProg;
     static bool mainmenu;
     static bool debug;
+    static bool noclouds;
     static float resW;
     static float resH;
     static float resTextW;
@@ -67,12 +66,13 @@ bool statics::gameover = false;
 float statics::gameoverProg = 0;
 bool statics::mainmenu = true;
 bool statics::debug = false;
+bool statics::noclouds = false;
 bool statics::pipeDir = false;
 float statics::resW = 812;
 float statics::resH = 812;
 float statics::resTextW = statics::resW / 2.0f;
 float statics::resTextH = statics::resH / 2.0f;
-char* statics::versionMetadata = "1.0.1"; // Change this line with version counter forward to make a new version in contribution
+char* statics::versionMetadata = "1.0.2"; // Change this line with version counter forward to make a new version in contribution
 bool collision(float dotX,float dotY, float zoneX1, float zoneX2, float zoneY1, float zoneY2)
 {
 	return dotX > zoneX1 && dotX < zoneX2 && dotY > zoneY1 && dotY < zoneY2;
@@ -183,10 +183,21 @@ int main(int argc, char *argv[])
  	if (argc > 1) // this full piece of code called argc > 1 is provided by GPT-Luna 6
   	{
        const std::string arg = argv[1];
-
+       if (argc > 2)
+       {
+       const std::string arg2 = argv[2];
+	   if (arg2 == "-noclouds")
+	   {
+	   	  statics::noclouds = true;
+	   }
+	   }
        if (arg == "-debug")
        {
           statics::debug = true;
+       }
+       else if (arg == "-noclouds")
+       {
+          statics::noclouds = true;
        }
        else if (arg == "-v")
        {
@@ -206,6 +217,7 @@ int main(int argc, char *argv[])
         	SDL_Log("Version %s", statics::versionMetadata);
         	SDL_Log("Every argument of this executable includes:");
         	SDL_Log(" -debug: Run a game with debug");
+        	SDL_Log(" -noclouds: Run a game without cloud FX, also works with both -debug -noclouds combination");
         	SDL_Log(" -v: read a version of game");
         	SDL_Log(" -help: Show this help");
         	return 0;
@@ -289,6 +301,31 @@ int main(int argc, char *argv[])
             glEnable(GL_BLEND);
             glPushMatrix ();
             // glRotatef (statics::jumpProg * 20, 0.0f, 0.0f, 1.0f);
+            if (!statics::noclouds)
+            {
+		    glBegin (GL_POLYGON); // cloud rendering start
+			float offset = sinf(statics::uptime * 2) / 5 + 0.5f;
+			float offset2 = sinf(statics::uptime * 4) / 5 * 4;
+			float colorshifter = (sinf(statics::uptime * 8) * 0.6f) / 2;
+			float size = 32.0f;
+			for (float i = 0;i < 20; i++)
+			{
+				glColor4f  (1.0f,1.0f,0.9f,0.7f - colorshifter); glVertex2f (0.0f + (i / size) + offset2, 0.3f + offset + (sinf(i / 2.0f) / 83));
+			}
+			for (float i = 0;i < 20; i++)
+			{
+				glColor4f  (1.0f,1.0f,0.9f,0.7f - colorshifter); glVertex2f (0.0f + (20 / size) + (sinf(i / 2.0f) / 83) + offset2, 0.3f - (i / 40.8f) + offset);
+			}                                                                
+			for (float i = 0;i < 20; i++)                                    
+			{                                                                
+				glColor4f  (1.0f,1.0f,0.9f,0.7 - colorshifter); glVertex2f (0.0f + (20 / size) - (i / size) + offset2, 0.3f - (20 / 40.8f) + offset + (sinf(i / 2.0f) / 83));
+			}
+			for (float i = 0;i < 20; i++)                                    
+			{                                                                
+				glColor4f  (1.0f,1.0f,0.9f,0.7f - colorshifter); glVertex2f (0.0f + offset2, 0.3f - (20 / 40.8f) + offset + (sinf(i / 2.0f) / 83));
+			}
+			glEnd (); // cloud rendering end
+			}
             glBegin (GL_TRIANGLES); // player bird body rendering start
             glColor3f (0.8f, 0.9f, 0.0f);   glVertex2f (statics::pos_x + 0.0f / 4, statics::pos_y + 1.0f / 4);
             glColor3f (1.0f, 1.0f, 0.0f);   glVertex2f (statics::pos_x + 0.87f / 4, statics::pos_y + -0.5f / 4);
