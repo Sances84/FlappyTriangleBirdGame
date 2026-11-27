@@ -302,6 +302,16 @@ int main(int argc, char *argv[])
             glEnable(GL_BLEND);
             glPushMatrix ();
             // glRotatef (statics::jumpProg * 20, 0.0f, 0.0f, 1.0f);
+    glBegin (GL_POLYGON);
+    for (int i = 0; i < 200; i++) { // sun rendering code snippet was came from "How to draw Circle in OpenGL | Computer... - Programming Life" from facebook page but was got suddenly removed a time ago. RIP but lol
+    	glColor3f (1.0f, 1.0f, 0.0f);
+        float p = 2 * 3.1416;
+        float r = 0.15;
+        float x = r * cos(p * i / 200);
+        float y = r * sin(p * i / 200);
+        glVertex2f(x - 0.6f, y + 0.7f);
+    }
+    glEnd ();
             if (!statics::noclouds)
             {
 		    glBegin (GL_POLYGON); // cloud rendering start
