@@ -237,6 +237,7 @@ int main(int argc, char *argv[])
         statics::resW, statics::resH,
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL
     );
+    setViewport(statics::resW, statics::resH);
 
     if (!window) {
         SDL_Log("Window creation failed: %s", SDL_GetError());
@@ -454,6 +455,7 @@ int main(int argc, char *argv[])
 		{
 			drawText("Flappy Triangle Bird Game", 24, -0.9f, 0.9f);
 			drawText("PRESS UP TO START", 24, -0.9f, 0.7f);
+			drawText(statics::versionMetadata, 12, -0.9f, -0.9f);
 		}
 
         SDL_GL_SwapWindow(window);
